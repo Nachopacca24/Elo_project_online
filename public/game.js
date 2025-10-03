@@ -39,7 +39,7 @@ function initGame() {
     draw() {
       ctx.beginPath();
       ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
-      ctx.fillStyle="white";
+      ctx.fillStyle="black";
       ctx.fill();
       ctx.closePath();
     }
@@ -48,7 +48,7 @@ function initGame() {
   class Tank {
     constructor(x,y,sprite,controls) {
       this.x=x; this.y=y; this.sprite=sprite; this.controls=controls;
-      this.angle=0; this.speed=3; this.bullets=[]; this.size=80; this.turnSpeed=2.5;
+      this.angle=0; this.speed=3; this.bullets=[]; this.size=180; this.turnSpeed=2.5;
     }
     update() {
       if(keys[this.controls.left]) this.angle -= this.turnSpeed;
