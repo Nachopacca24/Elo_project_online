@@ -179,50 +179,55 @@ function initGame() {
     }
 
     update() {
-      if (keys[this.controls.left])  this.angle -= this.turnSpeed;
-      if (keys[this.controls.right]) this.angle += this.turnSpeed;
+  if (keys[this.controls.left])  this.angle -= this.turnSpeed;
+  if (keys[this.controls.right]) this.angle += this.turnSpeed;
 
-      const rad = (this.angle - 90) * Math.PI / 180;
-      let nx = this.x;
-      let ny = this.y;
+  const rad = (this.angle - 90) * Math.PI / 180;
+  let nx = this.x;
+  let ny = this.y;
+  const moveSpeed = this.speed;
 
-      if (keys[this.controls.up]) {
-        nx += this.speed * Math.cos(rad);
-        ny += this.speed * Math.sin(rad);
-      }
-      if (keys[this.controls.down]) {
-        nx -= this.speed * Math.cos(rad);
-        ny -= this.speed * Math.sin(rad);
-      }
+  // Calcular nueva posición
+  if (keys[this.controls.up]) {
+    nx += moveSpeed * Math.cos(rad);
+    ny += moveSpeed * Math.sin(rad);
+  }
+  if (keys[this.controls.down]) {
+    nx -= moveSpeed * Math.cos(rad);
+    ny -= moveSpeed * Math.sin(rad);
+  }
 
-      if (!this.collidesAny(nx, this.y)) this.x = nx;
-      if (!this.collidesAny(this.x, ny)) this.y = ny;
+  // Mover solo si no colisiona
+  if (!this.collidesAny(nx, this.y)) this.x = nx;
+  if (!this.collidesAny(this.x, ny)) this.y = ny;
 
-      const verts = this.getCollisionRectVertices();
-      const minX = Math.min(...verts.map(v => v.x));
-      const maxX = Math.max(...verts.map(v => v.x));
-      const minY = Math.min(...verts.map(v => v.y));
-      const maxY = Math.max(...verts.map(v => v.y));
-      const padding = 0;
-      if (minX < 0 + padding) this.x += (0 + padding - minX);
-      if (maxX > canvas.width - padding) this.x -= (maxX - (canvas.width - padding));
-      if (minY < 0 + padding) this.y += (0 + padding - minY);
-      if (maxY > canvas.height - padding) this.y -= (maxY - (canvas.height - padding));
+  // Mantener dentro del canvas
+  const verts = this.getCollisionRectVertices();
+  const minX = Math.min(...verts.map(v => v.x));
+  const maxX = Math.max(...verts.map(v => v.x));
+  const minY = Math.min(...verts.map(v => v.y));
+  const maxY = Math.max(...verts.map(v => v.y));
+  const padding = 5;
+  if (minX < 0 + padding) this.x += (0 + padding - minX);
+  if (maxX > canvas.width - padding) this.x -= (maxX - (canvas.width - padding));
+  if (minY < 0 + padding) this.y += (0 + padding - minY);
+  if (maxY > canvas.height - padding) this.y -= (maxY - (canvas.height - padding));
 
-      // DISPARO
-      if (keys[this.controls.shoot]) {
-        this.shoot();
-        keys[this.controls.shoot] = false;
-      }
+  // Disparo
+  if (keys[this.controls.shoot]) {
+    this.shoot();
+    keys[this.controls.shoot] = false;
+  }
 
-      // Actualizar contador
-      const remaining = Math.max(0, 1500 - (Date.now() - this.lastShotTime));
-      if (remaining > 0) this.counterElement.textContent = `Player: ${(remaining/1000).toFixed(1)}s`;
-      else this.counterElement.textContent = "Ready to fire";
+  // Contador de disparo
+  const remaining = Math.max(0, 1500 - (Date.now() - this.lastShotTime));
+  this.counterElement.textContent = remaining > 0 ? `Player: ${(remaining/1000).toFixed(1)}s` : "Ready to fire";
 
-      this.bullets.forEach(b => b.update());
-      this.bullets = this.bullets.filter(b => !b.destroyed);
-    }
+  // Actualizar balas
+  this.bullets.forEach(b => b.update());
+  this.bullets = this.bullets.filter(b => !b.destroyed);
+}
+
 
     draw() {
       ctx.save();
@@ -241,13 +246,16 @@ function initGame() {
   walls.push(new Wall(0, 700, 1280, 20));
   walls.push(new Wall(0, 0, 20, 720));
   walls.push(new Wall(1260, 0, 20, 720));
+//---------------------------------------------------------
   walls.push(new Wall(590, 310, 100, 100));
   walls.push(new Wall(200, 150, 300, 20));
   walls.push(new Wall(780, 550, 300, 20));
+  
   walls.push(new Wall(400, 300, 20, 200));
   walls.push(new Wall(850, 200, 20, 200));
-  walls.push(new Wall(150, 600, 80, 20));
-  walls.push(new Wall(1050, 100, 80, 20));
+  walls.push(new Wall(150, 500, 80, 20));
+
+  walls.push(new Wall(1050, 200, 80, 20));
   walls.push(new Wall(650, 100, 20, 80));
   walls.push(new Wall(650, 600, 20, 80));
 
