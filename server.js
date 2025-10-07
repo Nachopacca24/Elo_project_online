@@ -11,6 +11,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "game.html"));
 });
 
-app.listen(PORT, () => {
+// Escuchar en todas las interfaces para que otros puedan conectarse
+app.listen(PORT, "192.168.10.144", () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
