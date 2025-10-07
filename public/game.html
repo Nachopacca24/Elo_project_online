@@ -3,23 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <title>Tanques Online</title>
-<style>
-  body {
-    margin: 0;
-    overflow: hidden;
-    background: black;
-  }
-  canvas {
-    background-color: darkgreen;
-    display: block;
-    margin: 0 auto;
-  }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <canvas id="gameCanvas" width="1280" height="720"></canvas>
 
-<!-- Incluir game.js -->
+<div id="ui">
+  <div id="player1Counter" class="player-counter blue">Player 1: Ready</div>
+  <div id="player2Counter" class="player-counter red">Player 2: Ready</div>
+</div>
+
 <script src="game.js"></script>
 </body>
 </html>

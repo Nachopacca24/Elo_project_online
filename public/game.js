@@ -17,6 +17,36 @@ let imagesLoaded = 0;
 });
 
 function initGame() {
+
+  // --- Contadores fuera del canvas ---
+  const uiDiv = document.createElement("div");
+  uiDiv.style.position = "absolute";
+  uiDiv.style.top = "10px";
+  uiDiv.style.left = "50%";
+  uiDiv.style.transform = "translateX(-50%)";
+  uiDiv.style.display = "flex";
+  uiDiv.style.gap = "50px";
+  uiDiv.style.fontFamily = "Arial, sans-serif";
+  uiDiv.style.fontSize = "20px";
+  document.body.appendChild(uiDiv);
+
+  const p1Counter = document.createElement("div");
+  p1Counter.style.padding = "10px 20px";
+  p1Counter.style.borderRadius = "8px";
+  p1Counter.style.backgroundColor = "rgba(0,0,255,0.7)";
+  p1Counter.style.color = "white";
+  p1Counter.textContent = "Player 1: Ready";
+  uiDiv.appendChild(p1Counter);
+
+  const p2Counter = document.createElement("div");
+  p2Counter.style.padding = "10px 20px";
+  p2Counter.style.borderRadius = "8px";
+  p2Counter.style.backgroundColor = "rgba(255,0,0,0.7)";
+  p2Counter.style.color = "white";
+  p2Counter.textContent = "Player 2: Ready";
+  uiDiv.appendChild(p2Counter);
+
+  // --- Clases ---
   class Wall {
     constructor(x, y, w, h) {
       this.x = x; this.y = y;
@@ -32,23 +62,65 @@ function initGame() {
 
   class Bullet {
     constructor(x, y, angle) {
-      this.x = x; this.y = y;
-      this.angle = angle;
+      this.x = x;
+      this.y = y;
       this.speed = 7;
       this.radius = 5;
       this.destroyed = false;
-    }
-    update() {
-      const rad = (this.angle - 90) * Math.PI / 180;
-      this.x += this.speed * Math.cos(rad);
-      this.y += this.speed * Math.sin(rad);
+      this.createdAt = Date.now(); // Para duración de 2.5s
 
-      if (this.x <= 0 || this.x >= canvas.width) this.angle = 180 - this.angle;
-      if (this.y <= 0 || this.y >= canvas.height) this.angle = -this.angle;
+      const rad = (angle - 90) * Math.PI / 180;
+      this.vx = this.speed * Math.cos(rad);
+      this.vy = this.speed * Math.sin(rad);
     }
+
+    update() {
+      // Destruir bala después de 2.5 segundos
+      if (Date.now() - this.createdAt > 2500) {
+        this.destroyed = true;
+        return;
+      }
+
+      this.x += this.vx;
+      this.y += this.vy;
+
+      // Rebote bordes
+      if (this.x - this.radius <= 0) { this.x = this.radius; this.vx = -this.vx; }
+      if (this.x + this.radius >= canvas.width) { this.x = canvas.width - this.radius; this.vx = -this.vx; }
+      if (this.y - this.radius <= 0) { this.y = this.radius; this.vy = -this.vy; }
+      if (this.y + this.radius >= canvas.height) { this.y = canvas.height - this.radius; this.vy = -this.vy; }
+
+      // Rebote muros
+      for (let i = 0; i < walls.length; i++) {
+        const wall = walls[i];
+
+        if (this.x + this.radius > wall.x && this.x - this.radius < wall.x + wall.width &&
+            this.y + this.radius > wall.y && this.y - this.radius < wall.y + wall.height) {
+
+          const prevX = this.x - this.vx;
+          const prevY = this.y - this.vy;
+
+          if (prevX + this.radius <= wall.x || prevX - this.radius >= wall.x + wall.width) {
+            this.vx = -this.vx;
+            if (prevX + this.radius <= wall.x) this.x = wall.x - this.radius;
+            else this.x = wall.x + wall.width + this.radius;
+          } 
+          else if (prevY + this.radius <= wall.y || prevY - this.radius >= wall.y + wall.height) {
+            this.vy = -this.vy;
+            if (prevY + this.radius <= wall.y) this.y = wall.y - this.radius;
+            else this.y = wall.y + wall.height + this.radius;
+          } 
+          else {
+            this.vx = -this.vx;
+            this.vy = -this.vy;
+          }
+        }
+      }
+    }
+
     draw() {
       ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
       ctx.fillStyle = "black";
       ctx.fill();
       ctx.closePath();
@@ -56,7 +128,7 @@ function initGame() {
   }
 
   class Tank {
-    constructor(x, y, sprite, controls) {
+    constructor(x, y, sprite, controls, counterElement) {
       this.x = x;
       this.y = y;
       this.sprite = sprite;
@@ -66,9 +138,10 @@ function initGame() {
       this.bullets = [];
       this.size = 180;
       this.turnSpeed = 2.5;
+      this.lastShotTime = 0; // Para limitar disparos cada 1.5s
+      this.counterElement = counterElement;
     }
 
-    // Vértices del rectángulo de colisión (centrado y rotando con el tanque)
     getCollisionRectVertices() {
       const w = this.size * 0.3;
       const h = this.size * 0.35;
@@ -84,7 +157,6 @@ function initGame() {
       ];
     }
 
-    // Colisiones
     collidesWith(wall, x = this.x, y = this.y) {
       const verts = this.getCollisionRectVertices();
       const minX = Math.min(...verts.map(v => v.x));
@@ -96,6 +168,14 @@ function initGame() {
 
     collidesAny(x = this.x, y = this.y) {
       return walls.some(w => this.collidesWith(w, x, y));
+    }
+
+    shoot() {
+      const now = Date.now();
+      if (now - this.lastShotTime >= 1500) { // 1.5 segundos
+        this.bullets.push(new Bullet(this.x, this.y, this.angle));
+        this.lastShotTime = now;
+      }
     }
 
     update() {
@@ -118,7 +198,6 @@ function initGame() {
       if (!this.collidesAny(nx, this.y)) this.x = nx;
       if (!this.collidesAny(this.x, ny)) this.y = ny;
 
-      // Limitar dentro de la pantalla
       const verts = this.getCollisionRectVertices();
       const minX = Math.min(...verts.map(v => v.x));
       const maxX = Math.max(...verts.map(v => v.x));
@@ -130,28 +209,22 @@ function initGame() {
       if (minY < 0 + padding) this.y += (0 + padding - minY);
       if (maxY > canvas.height - padding) this.y -= (maxY - (canvas.height - padding));
 
+      // DISPARO
       if (keys[this.controls.shoot]) {
         this.shoot();
         keys[this.controls.shoot] = false;
       }
+
+      // Actualizar contador
+      const remaining = Math.max(0, 1500 - (Date.now() - this.lastShotTime));
+      if (remaining > 0) this.counterElement.textContent = `Player: ${(remaining/1000).toFixed(1)}s`;
+      else this.counterElement.textContent = "Ready to fire";
 
       this.bullets.forEach(b => b.update());
       this.bullets = this.bullets.filter(b => !b.destroyed);
     }
 
     draw() {
-      // Rectángulo de colisión TRANSPARENTE
-      const verts = this.getCollisionRectVertices();
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(verts[0].x, verts[0].y);
-      verts.slice(1).forEach(v => ctx.lineTo(v.x, v.y));
-      ctx.closePath();
-      // ctx.fillStyle = "rgba(255,255,255,0.3)"; // eliminado para transparencia
-      // ctx.fill();
-      ctx.restore();
-
-      // Dibujar tanque
       ctx.save();
       ctx.translate(this.x, this.y);
       ctx.rotate(this.angle * Math.PI / 180);
@@ -160,19 +233,15 @@ function initGame() {
 
       this.bullets.forEach(b => b.draw());
     }
-
-    shoot() {
-      this.bullets.push(new Bullet(this.x, this.y, this.angle));
-    }
   }
 
   // --- Muros ---
   let walls = [];
-  walls.push(new Wall(0, 0, 1280, 20)); // superior
-  walls.push(new Wall(0, 700, 1280, 20)); // inferior
-  walls.push(new Wall(0, 0, 20, 720)); // izquierda
-  walls.push(new Wall(1260, 0, 20, 720)); // derecha
-  walls.push(new Wall(590, 310, 100, 100)); // centro
+  walls.push(new Wall(0, 0, 1280, 20));
+  walls.push(new Wall(0, 700, 1280, 20));
+  walls.push(new Wall(0, 0, 20, 720));
+  walls.push(new Wall(1260, 0, 20, 720));
+  walls.push(new Wall(590, 310, 100, 100));
   walls.push(new Wall(200, 150, 300, 20));
   walls.push(new Wall(780, 550, 300, 20));
   walls.push(new Wall(400, 300, 20, 200));
@@ -185,8 +254,8 @@ function initGame() {
   const p1Controls = { up: "arrowup", down: "arrowdown", left: "arrowleft", right: "arrowright", shoot: " " };
   const p2Controls = { up: "w", down: "s", left: "a", right: "d", shoot: "f" };
 
-  const p1 = new Tank(300, 300, tankImgBlue, p1Controls);
-  const p2 = new Tank(1000, 500, tankImgRed, p2Controls);
+  const p1 = new Tank(300, 300, tankImgBlue, p1Controls, p1Counter);
+  const p2 = new Tank(1000, 500, tankImgRed, p2Controls, p2Counter);
 
   function ensureValidSpawn(tank) {
     if (!tank.collidesAny()) return;
