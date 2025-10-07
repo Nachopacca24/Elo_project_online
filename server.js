@@ -12,6 +12,6 @@ app.get("/", (req, res) => {
 });
 
 // Escuchar en todas las interfaces para que otros puedan conectarse
-app.listen(PORT, "192.168.10.144", () => {
+app.listen(PORT, "10.157.63.98", () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

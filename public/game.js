@@ -17,7 +17,6 @@ let imagesLoaded = 0;
 });
 
 function initGame() {
-
   // --- Contadores fuera del canvas ---
   const uiDiv = document.createElement("div");
   uiDiv.style.position = "absolute";
@@ -35,7 +34,15 @@ function initGame() {
   p1Counter.style.borderRadius = "8px";
   p1Counter.style.backgroundColor = "rgba(0,0,255,0.7)";
   p1Counter.style.color = "white";
+  p1Counter.style.display = "flex";
+  p1Counter.style.alignItems = "center";
   p1Counter.textContent = "Player 1: Ready";
+
+  const p1Hearts = document.createElement("span");
+  p1Hearts.textContent = "❤️❤️❤️";
+  p1Hearts.style.marginLeft = "10px";
+  p1Counter.appendChild(p1Hearts);
+
   uiDiv.appendChild(p1Counter);
 
   const p2Counter = document.createElement("div");
@@ -43,7 +50,15 @@ function initGame() {
   p2Counter.style.borderRadius = "8px";
   p2Counter.style.backgroundColor = "rgba(255,0,0,0.7)";
   p2Counter.style.color = "white";
+  p2Counter.style.display = "flex";
+  p2Counter.style.alignItems = "center";
   p2Counter.textContent = "Player 2: Ready";
+
+  const p2Hearts = document.createElement("span");
+  p2Hearts.textContent = "❤️❤️❤️";
+  p2Hearts.style.marginLeft = "10px";
+  p2Counter.appendChild(p2Hearts);
+
   uiDiv.appendChild(p2Counter);
 
   // --- Clases ---
@@ -67,7 +82,8 @@ function initGame() {
       this.speed = 7;
       this.radius = 5;
       this.destroyed = false;
-      this.createdAt = Date.now(); // Para duración de 2.5s
+      this.createdAt = Date.now();
+      this.canHitAfter = 100; // ms antes de poder dañar tanques
 
       const rad = (angle - 90) * Math.PI / 180;
       this.vx = this.speed * Math.cos(rad);
@@ -75,7 +91,6 @@ function initGame() {
     }
 
     update() {
-      // Destruir bala después de 2.5 segundos
       if (Date.now() - this.createdAt > 2500) {
         this.destroyed = true;
         return;
@@ -91,26 +106,19 @@ function initGame() {
       if (this.y + this.radius >= canvas.height) { this.y = canvas.height - this.radius; this.vy = -this.vy; }
 
       // Rebote muros
-      for (let i = 0; i < walls.length; i++) {
-        const wall = walls[i];
-
+      for (let wall of walls) {
         if (this.x + this.radius > wall.x && this.x - this.radius < wall.x + wall.width &&
             this.y + this.radius > wall.y && this.y - this.radius < wall.y + wall.height) {
-
           const prevX = this.x - this.vx;
           const prevY = this.y - this.vy;
 
           if (prevX + this.radius <= wall.x || prevX - this.radius >= wall.x + wall.width) {
             this.vx = -this.vx;
-            if (prevX + this.radius <= wall.x) this.x = wall.x - this.radius;
-            else this.x = wall.x + wall.width + this.radius;
-          } 
-          else if (prevY + this.radius <= wall.y || prevY - this.radius >= wall.y + wall.height) {
+            this.x = prevX + (prevX + this.radius <= wall.x ? -this.radius : this.radius);
+          } else if (prevY + this.radius <= wall.y || prevY - this.radius >= wall.y + wall.height) {
             this.vy = -this.vy;
-            if (prevY + this.radius <= wall.y) this.y = wall.y - this.radius;
-            else this.y = wall.y + wall.height + this.radius;
-          } 
-          else {
+            this.y = prevY + (prevY + this.radius <= wall.y ? -this.radius : this.radius);
+          } else {
             this.vx = -this.vx;
             this.vy = -this.vy;
           }
@@ -128,7 +136,7 @@ function initGame() {
   }
 
   class Tank {
-    constructor(x, y, sprite, controls, counterElement) {
+    constructor(x, y, sprite, controls, counterElement, heartsElement) {
       this.x = x;
       this.y = y;
       this.sprite = sprite;
@@ -138,8 +146,10 @@ function initGame() {
       this.bullets = [];
       this.size = 180;
       this.turnSpeed = 2.5;
-      this.lastShotTime = 0; // Para limitar disparos cada 1.5s
+      this.lastShotTime = 0;
       this.counterElement = counterElement;
+      this.heartsElement = heartsElement;
+      this.lives = 3;
     }
 
     getCollisionRectVertices() {
@@ -148,12 +158,11 @@ function initGame() {
       const rad = this.angle * Math.PI / 180;
       const cos = Math.cos(rad);
       const sin = Math.sin(rad);
-
       return [
-        { x: this.x + (-w/2.3) * cos - (-h/1.5) * sin, y: this.y + (-w/2.3) * sin + (-h/1.3) * cos },
-        { x: this.x + (w/2) * cos - (-h/1.5) * sin,  y: this.y + (w/2) * sin + (-h/1.3) * cos },
-        { x: this.x + (w/2) * cos - (h/2) * sin,     y: this.y + (w/2) * sin + (h/2.5) * cos },
-        { x: this.x + (-w/2.3) * cos - (h/2) * sin,  y: this.y + (-w/2) * sin + (h/2.5) * cos }
+        { x: this.x + (-w/2.3)*cos - (-h/1.5)*sin, y: this.y + (-w/2.3)*sin + (-h/1.3)*cos },
+        { x: this.x + (w/2)*cos - (-h/1.5)*sin, y: this.y + (w/2)*sin + (-h/1.3)*cos },
+        { x: this.x + (w/2)*cos - (h/2)*sin, y: this.y + (w/2)*sin + (h/2.5)*cos },
+        { x: this.x + (-w/2.3)*cos - (h/2)*sin, y: this.y + (-w/2)*sin + (h/2.5)*cos }
       ];
     }
 
@@ -172,62 +181,70 @@ function initGame() {
 
     shoot() {
       const now = Date.now();
-      if (now - this.lastShotTime >= 1500) { // 1.5 segundos
+      if (now - this.lastShotTime >= 1500) {
         this.bullets.push(new Bullet(this.x, this.y, this.angle));
         this.lastShotTime = now;
       }
     }
 
-    update() {
-  if (keys[this.controls.left])  this.angle -= this.turnSpeed;
-  if (keys[this.controls.right]) this.angle += this.turnSpeed;
-
-  const rad = (this.angle - 90) * Math.PI / 180;
-  let nx = this.x;
-  let ny = this.y;
-  const moveSpeed = this.speed;
-
-  // Calcular nueva posición
-  if (keys[this.controls.up]) {
-    nx += moveSpeed * Math.cos(rad);
-    ny += moveSpeed * Math.sin(rad);
+    takeHit() {
+  this.lives--;
+  this.heartsElement.textContent = "❤️".repeat(this.lives);
+  if (this.lives <= 0) {
+    const winner = this === p1 ? "Player 2" : "Player 1";
+    gameOver(winner);
   }
-  if (keys[this.controls.down]) {
-    nx -= moveSpeed * Math.cos(rad);
-    ny -= moveSpeed * Math.sin(rad);
-  }
-
-  // Mover solo si no colisiona
-  if (!this.collidesAny(nx, this.y)) this.x = nx;
-  if (!this.collidesAny(this.x, ny)) this.y = ny;
-
-  // Mantener dentro del canvas
-  const verts = this.getCollisionRectVertices();
-  const minX = Math.min(...verts.map(v => v.x));
-  const maxX = Math.max(...verts.map(v => v.x));
-  const minY = Math.min(...verts.map(v => v.y));
-  const maxY = Math.max(...verts.map(v => v.y));
-  const padding = 5;
-  if (minX < 0 + padding) this.x += (0 + padding - minX);
-  if (maxX > canvas.width - padding) this.x -= (maxX - (canvas.width - padding));
-  if (minY < 0 + padding) this.y += (0 + padding - minY);
-  if (maxY > canvas.height - padding) this.y -= (maxY - (canvas.height - padding));
-
-  // Disparo
-  if (keys[this.controls.shoot]) {
-    this.shoot();
-    keys[this.controls.shoot] = false;
-  }
-
-  // Contador de disparo
-  const remaining = Math.max(0, 1500 - (Date.now() - this.lastShotTime));
-  this.counterElement.textContent = remaining > 0 ? `Player: ${(remaining/1000).toFixed(1)}s` : "Ready to fire";
-
-  // Actualizar balas
-  this.bullets.forEach(b => b.update());
-  this.bullets = this.bullets.filter(b => !b.destroyed);
 }
 
+
+    update() {
+      if (keys[this.controls.left])  this.angle -= this.turnSpeed;
+      if (keys[this.controls.right]) this.angle += this.turnSpeed;
+
+      const rad = (this.angle - 90) * Math.PI / 180;
+      let nx = this.x;
+      let ny = this.y;
+      const moveSpeed = this.speed;
+
+      if (keys[this.controls.up]) {
+        nx += moveSpeed * Math.cos(rad);
+        ny += moveSpeed * Math.sin(rad);
+      }
+      if (keys[this.controls.down]) {
+        nx -= moveSpeed * Math.cos(rad);
+        ny -= moveSpeed * Math.sin(rad);
+      }
+
+      const empuje = 0.5;
+      if (!this.collidesAny(nx, this.y)) this.x = nx;
+      else this.x -= Math.sign(nx - this.x) * empuje;
+
+      if (!this.collidesAny(this.x, ny)) this.y = ny;
+      else this.y -= Math.sign(ny - this.y) * empuje;
+
+      const verts = this.getCollisionRectVertices();
+      const minX = Math.min(...verts.map(v => v.x));
+      const maxX = Math.max(...verts.map(v => v.x));
+      const minY = Math.min(...verts.map(v => v.y));
+      const maxY = Math.max(...verts.map(v => v.y));
+      const padding = 5;
+      if (minX < 0 + padding) this.x += (0 + padding - minX);
+      if (maxX > canvas.width - padding) this.x -= (maxX - (canvas.width - padding));
+      if (minY < 0 + padding) this.y += (0 + padding - minY);
+      if (maxY > canvas.height - padding) this.y -= (maxY - (canvas.height - padding));
+
+      if (keys[this.controls.shoot]) {
+        this.shoot();
+        keys[this.controls.shoot] = false;
+      }
+
+      const remaining = Math.max(0, 1500 - (Date.now() - this.lastShotTime));
+      this.counterElement.textContent = remaining > 0 ? `Player: ${(remaining/1000).toFixed(1)}s` : "Ready to fire";
+      this.counterElement.appendChild(this.heartsElement);
+
+      this.bullets.forEach(b => b.update());
+      this.bullets = this.bullets.filter(b => !b.destroyed);
+    }
 
     draw() {
       ctx.save();
@@ -246,15 +263,12 @@ function initGame() {
   walls.push(new Wall(0, 700, 1280, 20));
   walls.push(new Wall(0, 0, 20, 720));
   walls.push(new Wall(1260, 0, 20, 720));
-//---------------------------------------------------------
   walls.push(new Wall(590, 310, 100, 100));
   walls.push(new Wall(200, 150, 300, 20));
   walls.push(new Wall(780, 550, 300, 20));
-  
   walls.push(new Wall(400, 300, 20, 200));
   walls.push(new Wall(850, 200, 20, 200));
   walls.push(new Wall(150, 500, 80, 20));
-
   walls.push(new Wall(1050, 200, 80, 20));
   walls.push(new Wall(650, 100, 20, 80));
   walls.push(new Wall(650, 600, 20, 80));
@@ -262,8 +276,8 @@ function initGame() {
   const p1Controls = { up: "arrowup", down: "arrowdown", left: "arrowleft", right: "arrowright", shoot: " " };
   const p2Controls = { up: "w", down: "s", left: "a", right: "d", shoot: "f" };
 
-  const p1 = new Tank(300, 300, tankImgBlue, p1Controls, p1Counter);
-  const p2 = new Tank(1000, 500, tankImgRed, p2Controls, p2Counter);
+  const p1 = new Tank(300, 300, tankImgBlue, p1Controls, p1Counter, p1Hearts);
+  const p2 = new Tank(1000, 500, tankImgRed, p2Controls, p2Counter, p2Hearts);
 
   function ensureValidSpawn(tank) {
     if (!tank.collidesAny()) return;
@@ -283,13 +297,65 @@ function initGame() {
   window.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
   window.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
 
-  function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    walls.forEach(w => w.draw());
-    p1.update(); p2.update();
-    p1.draw(); p2.draw();
-    requestAnimationFrame(gameLoop);
+  function checkBulletHits() {
+  const now = Date.now();
+  for (let bullet of [...p1.bullets, ...p2.bullets]) {
+    if (now - bullet.createdAt < bullet.canHitAfter) continue; // aún no puede golpear
+
+    for (let tank of [p1, p2]) {
+      const verts = tank.getCollisionRectVertices();
+      const minX = Math.min(...verts.map(v => v.x));
+      const maxX = Math.max(...verts.map(v => v.x));
+      const minY = Math.min(...verts.map(v => v.y));
+      const maxY = Math.max(...verts.map(v => v.y));
+      if (bullet.x > minX && bullet.x < maxX && bullet.y > minY && bullet.y < maxY) {
+        tank.takeHit();
+        bullet.destroyed = true;
+        break;
+      }
+    }
+  }
+}
+
+
+
+  let gameEnded = false;
+let winnerText = "";
+
+function gameOver(winner) {
+  gameEnded = true;
+  winnerText = `${winner} WINS!`;
+}
+
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  walls.forEach(w => w.draw());
+  p1.update(); 
+  p2.update();
+  checkBulletHits();
+  p1.draw(); 
+  p2.draw();
+
+  if (gameEnded) {
+    // Cubrir todo con fondo semi-transparente
+    ctx.fillStyle = "rgba(0,0,0,0.7)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Texto GAME OVER
+    ctx.fillStyle = "white";
+    ctx.font = "bold 80px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 40);
+
+    // Texto ganador
+    ctx.font = "bold 60px Arial";
+    ctx.fillText(winnerText, canvas.width / 2, canvas.height / 2 + 40);
+
+    return; // detener loop
   }
 
-  gameLoop();
+  requestAnimationFrame(gameLoop);
+}
+gameLoop();
+
 }
