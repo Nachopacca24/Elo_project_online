@@ -18,12 +18,11 @@ let imagesLoaded = 0;
 
 function initGame() {
   // --- Obtener nombres de jugadores desde localStorage ---
-const player1 = JSON.parse(localStorage.getItem("player1")) || { username: "Player 1" };
-const player2 = JSON.parse(localStorage.getItem("player2")) || { username: "Player 2" };
+  const player1 = JSON.parse(localStorage.getItem("player1")) || { username: "Player 1" };
+  const player2 = JSON.parse(localStorage.getItem("player2")) || { username: "Player 2" };
 
-const player1Name = player1.username;
-const player2Name = player2.username;
-
+  const player1Name = player1.username;
+  const player2Name = player2.username;
 
   // --- Contadores fuera del canvas ---
   const uiDiv = document.createElement("div");
@@ -61,133 +60,165 @@ const player2Name = player2.username;
 
   // --- Clases ---
   class Wall {
-  constructor(x, y, w, h) {
-    this.x = x;
-    this.y = y;
-    this.width = w;
-    this.height = h;
-  }
-
-  draw() {
-    // 🎨 Degradado metálico
-    const gradient = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y + this.height);
-    gradient.addColorStop(0, "#4a4a4a");  // gris oscuro
-    gradient.addColorStop(0.5, "#9e9e9e"); // brillo metálico medio
-    gradient.addColorStop(1, "#3d3d3d");  // gris oscuro
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(this.x, this.y, this.width, this.height);
-
-    // 💡 Borde verde suave
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "#00ff6699";  // verde con transparencia (más suave)
-    ctx.shadowBlur = 4;             // brillo más tenue
-    ctx.shadowColor = "#00ff6699";  // sombra verde débil
-    ctx.strokeRect(this.x, this.y, this.width, this.height);
-
-    // 🔧 Desactivar sombra para no afectar otros elementos
-    ctx.shadowBlur = 0;
-  }
-}
-
-
-  class Bullet {
-  constructor(x, y, angle) {
-    this.x = x;
-    this.y = y;
-    this.speed = 7;
-    this.radius = 5;
-    this.destroyed = false;
-    this.createdAt = Date.now();
-    this.canHitAfter = 100;
-
-    const rad = (angle - 90) * Math.PI / 180;
-    this.vx = this.speed * Math.cos(rad);
-    this.vy = this.speed * Math.sin(rad);
-  }
-
-  update() {
-    if (Date.now() - this.createdAt > 2500) { 
-      this.destroyed = true; 
-      return; 
+    constructor(x, y, w, h) {
+      this.x = x;
+      this.y = y;
+      this.width = w;
+      this.height = h;
     }
 
-    this.x += this.vx; 
-    this.y += this.vy;
+    draw() {
+      // 🎨 Degradado metálico
+      const gradient = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y + this.height);
+      gradient.addColorStop(0, "#4a4a4a");
+      gradient.addColorStop(0.5, "#9e9e9e");
+      gradient.addColorStop(1, "#3d3d3d");
 
-    // Rebote bordes
-    if (this.x - this.radius <= 0) { this.x = this.radius; this.vx = -this.vx; }
-    if (this.x + this.radius >= canvas.width) { this.x = canvas.width - this.radius; this.vx = -this.vx; }
-    if (this.y - this.radius <= 0) { this.y = this.radius; this.vy = -this.vy; }
-    if (this.y + this.radius >= canvas.height) { this.y = canvas.height - this.radius; this.vy = -this.vy; }
+      ctx.fillStyle = gradient;
+      ctx.fillRect(this.x, this.y, this.width, this.height);
 
-    // Rebote muros
-    for (let wall of walls) {
-      if (this.x + this.radius > wall.x && this.x - this.radius < wall.x + wall.width &&
-          this.y + this.radius > wall.y && this.y - this.radius < wall.y + wall.height) {
-        const prevX = this.x - this.vx;
-        const prevY = this.y - this.vy;
-        if (prevX + this.radius <= wall.x || prevX - this.radius >= wall.x + wall.width) {
-          this.vx = -this.vx;
-          this.x = prevX;
-        } else if (prevY + this.radius <= wall.y || prevY - this.radius >= wall.y + wall.height) {
-          this.vy = -this.vy;
-          this.y = prevY;
-        } else { 
-          this.vx = -this.vx; 
-          this.vy = -this.vy; 
+      // 💡 Borde verde suave
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#00ff6699";
+      ctx.shadowBlur = 4;
+      ctx.shadowColor = "#00ff6699";
+      ctx.strokeRect(this.x, this.y, this.width, this.height);
+
+      // 🔧 Desactivar sombra para no afectar otros elementos
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  class Bullet {
+    constructor(x, y, angle) {
+      this.x = x;
+      this.y = y;
+      this.speed = 7;
+      this.radius = 5;
+      this.destroyed = false;
+      this.createdAt = Date.now();
+      this.canHitAfter = 100;
+
+      const rad = (angle - 90) * Math.PI / 180;
+      this.vx = this.speed * Math.cos(rad);
+      this.vy = this.speed * Math.sin(rad);
+    }
+
+    update() {
+      if (Date.now() - this.createdAt > 2500) {
+        this.destroyed = true;
+        return;
+      }
+
+      this.x += this.vx;
+      this.y += this.vy;
+
+      // Rebote bordes
+      if (this.x - this.radius <= 0) { this.x = this.radius; this.vx = -this.vx; }
+      if (this.x + this.radius >= canvas.width) { this.x = canvas.width - this.radius; this.vx = -this.vx; }
+      if (this.y - this.radius <= 0) { this.y = this.radius; this.vy = -this.vy; }
+      if (this.y + this.radius >= canvas.height) { this.y = canvas.height - this.radius; this.vy = -this.vy; }
+
+      // Rebote muros
+      for (let wall of walls) {
+        if (this.x + this.radius > wall.x && this.x - this.radius < wall.x + wall.width &&
+            this.y + this.radius > wall.y && this.y - this.radius < wall.y + wall.height) {
+          const prevX = this.x - this.vx;
+          const prevY = this.y - this.vy;
+          if (prevX + this.radius <= wall.x || prevX - this.radius >= wall.x + wall.width) {
+            this.vx = -this.vx;
+            this.x = prevX;
+          } else if (prevY + this.radius <= wall.y || prevY - this.radius >= wall.y + wall.height) {
+            this.vy = -this.vy;
+            this.y = prevY;
+          } else {
+            this.vx = -this.vx;
+            this.vy = -this.vy;
+          }
         }
       }
     }
+
+    draw() {
+      ctx.beginPath();
+      const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 2);
+      gradient.addColorStop(0, "#ff8800");
+      gradient.addColorStop(0.6, "#ff3300");
+      gradient.addColorStop(1, "#660000");
+
+      ctx.fillStyle = gradient;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = "#ff3300";
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.closePath();
+
+      ctx.shadowBlur = 0;
+    }
   }
-
-  draw() {
-    ctx.beginPath();
-    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 2);
-    gradient.addColorStop(0, "#ff8800");   // centro naranja brillante
-    gradient.addColorStop(0.6, "#ff3300"); // rojo encendido
-    gradient.addColorStop(1, "#660000");   // borde oscuro
-
-    ctx.fillStyle = gradient;
-    ctx.shadowBlur = 10;           // brillo leve
-    ctx.shadowColor = "#ff3300";   // tono neón rojo–naranja
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.closePath();
-
-    ctx.shadowBlur = 0;            // limpiar sombra para no afectar otros objetos
-  }
-}
-
 
   class Tank {
     constructor(x, y, sprite, controls, counterElement, heartsElement) {
-      this.x = x; this.y = y; this.sprite = sprite; this.controls = controls;
-      this.angle = 0; this.speed = 3; this.bullets = []; this.size = 180; this.turnSpeed = 2.5;
-      this.lastShotTime = 0; this.counterElement = counterElement; this.heartsElement = heartsElement; this.lives = 3;
+      this.x = x;
+      this.y = y;
+      this.sprite = sprite;
+      this.controls = controls;
+      this.angle = 0;
+      this.speed = 3;
+      this.bullets = [];
+      this.size = 180;
+      this.turnSpeed = 2.5;
+      this.lastShotTime = 0;
+      this.counterElement = counterElement;
+      this.heartsElement = heartsElement;
+      this.lives = 3;
     }
 
-    getCollisionRectVertices() {
-      const w = this.size * 0.3; const h = this.size * 0.35; const rad = this.angle * Math.PI / 180;
-      const cos = Math.cos(rad); const sin = Math.sin(rad);
+    // Obtener vértices en una posición específica
+    getCollisionRectVerticesAt(x, y) {
+      const w = this.size * 0.3;
+      const h = this.size * 0.35;
+      const rad = this.angle * Math.PI / 180;
+      const cos = Math.cos(rad);
+      const sin = Math.sin(rad);
+
       return [
-        { x: this.x + (-w/2.3)*cos - (-h/1.5)*sin, y: this.y + (-w/2.3)*sin + (-h/1.3)*cos },
-        { x: this.x + (w/2)*cos - (-h/1.5)*sin, y: this.y + (w/2)*sin + (-h/1.3)*cos },
-        { x: this.x + (w/2)*cos - (h/2)*sin, y: this.y + (w/2)*sin + (h/2.5)*cos },
-        { x: this.x + (-w/2.3)*cos - (h/2)*sin, y: this.y + (-w/2)*sin + (h/2.5)*cos }
+        { x: x + (-w/2.3)*cos - (-h/1.5)*sin, y: y + (-w/2.3)*sin + (-h/1.3)*cos },
+        { x: x + (w/2)*cos - (-h/1.5)*sin, y: y + (w/2)*sin + (-h/1.3)*cos },
+        { x: x + (w/2)*cos - (h/2)*sin, y: y + (w/2)*sin + (h/2.5)*cos },
+        { x: x + (-w/2.3)*cos - (h/2)*sin, y: y + (-w/2)*sin + (h/2.5)*cos }
       ];
     }
 
-    collidesWith(wall, x = this.x, y = this.y) {
-      const verts = this.getCollisionRectVertices(); const minX = Math.min(...verts.map(v => v.x));
-      const maxX = Math.max(...verts.map(v => v.x)); const minY = Math.min(...verts.map(v => v.y));
-      const maxY = Math.max(...verts.map(v => v.y));
-      return !(maxX < wall.x || minX > wall.x + wall.width || maxY < wall.y || minY > wall.y + wall.height);
+    // Obtener vértices en la posición actual
+    getCollisionRectVertices() {
+      return this.getCollisionRectVerticesAt(this.x, this.y);
     }
 
-    collidesAny(x = this.x, y = this.y) { return walls.some(w => this.collidesWith(w, x, y)); }
+    // Verificar colisión con un muro en una posición específica
+    collidesWithAt(wall, x, y) {
+      const verts = this.getCollisionRectVerticesAt(x, y);
+      const minX = Math.min(...verts.map(v => v.x));
+      const maxX = Math.max(...verts.map(v => v.x));
+      const minY = Math.min(...verts.map(v => v.y));
+      const maxY = Math.max(...verts.map(v => v.y));
 
-    shoot() { const now = Date.now(); if (now - this.lastShotTime >= 1500) { this.bullets.push(new Bullet(this.x, this.y, this.angle)); this.lastShotTime = now; } }
+      return !(maxX < wall.x || minX > wall.x + wall.width || 
+               maxY < wall.y || minY > wall.y + wall.height);
+    }
+
+    // Verificar colisión con cualquier muro en una posición específica
+    collidesAnyAt(x, y) {
+      return walls.some(w => this.collidesWithAt(w, x, y));
+    }
+
+    shoot() {
+      const now = Date.now();
+      if (now - this.lastShotTime >= 1500) {
+        this.bullets.push(new Bullet(this.x, this.y, this.angle));
+        this.lastShotTime = now;
+      }
+    }
 
     takeHit() {
       this.lives--;
@@ -199,46 +230,93 @@ const player2Name = player2.username;
     }
 
     update() {
+      // Rotación
       if (keys[this.controls.left]) this.angle -= this.turnSpeed;
       if (keys[this.controls.right]) this.angle += this.turnSpeed;
+
       const rad = (this.angle - 90) * Math.PI / 180;
-      let nx = this.x; let ny = this.y; const moveSpeed = this.speed;
-      if (keys[this.controls.up]) { nx += moveSpeed * Math.cos(rad); ny += moveSpeed * Math.sin(rad); }
-      if (keys[this.controls.down]) { nx -= moveSpeed * Math.cos(rad); ny -= moveSpeed * Math.sin(rad); }
+      const moveSpeed = this.speed;
 
-      const empuje = 0.5;
-      if (!this.collidesAny(nx, this.y)) this.x = nx; else this.x -= Math.sign(nx - this.x) * empuje;
-      if (!this.collidesAny(this.x, ny)) this.y = ny; else this.y -= Math.sign(ny - this.y) * empuje;
+      // Calcular nueva posición
+      let nx = this.x;
+      let ny = this.y;
 
-      const verts = this.getCollisionRectVertices(); const minX = Math.min(...verts.map(v => v.x));
-      const maxX = Math.max(...verts.map(v => v.x)); const minY = Math.min(...verts.map(v => v.y));
-      const maxY = Math.max(...verts.map(v => v.y)); const padding = 5;
+      if (keys[this.controls.up]) {
+        nx += moveSpeed * Math.cos(rad);
+        ny += moveSpeed * Math.sin(rad);
+      }
+      if (keys[this.controls.down]) {
+        nx -= moveSpeed * Math.cos(rad);
+        ny -= moveSpeed * Math.sin(rad);
+      }
+
+      // Intentar mover en X primero
+      if (!this.collidesAnyAt(nx, this.y)) {
+        this.x = nx;
+      }
+
+      // Intentar mover en Y después
+      if (!this.collidesAnyAt(this.x, ny)) {
+        this.y = ny;
+      }
+
+      // Verificar límites del canvas
+      const verts = this.getCollisionRectVertices();
+      const minX = Math.min(...verts.map(v => v.x));
+      const maxX = Math.max(...verts.map(v => v.x));
+      const minY = Math.min(...verts.map(v => v.y));
+      const maxY = Math.max(...verts.map(v => v.y));
+
+      const padding = 5;
+
+      // Ajustar si se sale de los bordes
       if (minX < 0 + padding) this.x += (0 + padding - minX);
       if (maxX > canvas.width - padding) this.x -= (maxX - (canvas.width - padding));
       if (minY < 0 + padding) this.y += (0 + padding - minY);
       if (maxY > canvas.height - padding) this.y -= (maxY - (canvas.height - padding));
 
-      if (keys[this.controls.shoot]) { this.shoot(); keys[this.controls.shoot] = false; }
+      // Disparo
+      if (keys[this.controls.shoot]) {
+        this.shoot();
+        keys[this.controls.shoot] = false;
+      }
 
+      // Actualizar contador de recarga
       const remaining = Math.max(0, 1500 - (Date.now() - this.lastShotTime));
-      this.counterElement.textContent = remaining > 0 ? `${this === p1 ? player1Name : player2Name}: ${(remaining/1000).toFixed(1)}s` : "Ready to fire";
+      this.counterElement.textContent = remaining > 0 
+        ? `${this === p1 ? player1Name : player2Name}: ${(remaining/1000).toFixed(1)}s` 
+        : "Ready to fire";
       this.counterElement.appendChild(this.heartsElement);
 
+      // Actualizar balas
       this.bullets.forEach(b => b.update());
       this.bullets = this.bullets.filter(b => !b.destroyed);
     }
 
-    draw() { ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle * Math.PI / 180); ctx.drawImage(this.sprite, -this.size/2, -this.size/2, this.size, this.size); ctx.restore(); this.bullets.forEach(b => b.draw()); }
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle * Math.PI / 180);
+      ctx.drawImage(this.sprite, -this.size/2, -this.size/2, this.size, this.size);
+      ctx.restore();
+      this.bullets.forEach(b => b.draw());
+    }
   }
 
   // --- Muros ---
   let walls = [];
-  walls.push(new Wall(0, 0, 1280, 20)); walls.push(new Wall(0, 700, 1280, 20));
-  walls.push(new Wall(0, 0, 20, 720)); walls.push(new Wall(1260, 0, 20, 720));
-  walls.push(new Wall(590, 310, 100, 100)); walls.push(new Wall(200, 150, 300, 20));
-  walls.push(new Wall(780, 550, 300, 20)); walls.push(new Wall(400, 300, 20, 200));
-  walls.push(new Wall(850, 200, 20, 200)); walls.push(new Wall(150, 500, 80, 20));
-  walls.push(new Wall(1050, 200, 80, 20)); walls.push(new Wall(650, 100, 20, 80));
+  walls.push(new Wall(0, 0, 1280, 20));
+  walls.push(new Wall(0, 700, 1280, 20));
+  walls.push(new Wall(0, 0, 20, 720));
+  walls.push(new Wall(1260, 0, 20, 720));
+  walls.push(new Wall(590, 310, 100, 100));
+  walls.push(new Wall(200, 150, 300, 20));
+  walls.push(new Wall(780, 550, 300, 20));
+  walls.push(new Wall(400, 300, 20, 200));
+  walls.push(new Wall(850, 200, 20, 200));
+  walls.push(new Wall(150, 500, 80, 20));
+  walls.push(new Wall(1050, 200, 80, 20));
+  walls.push(new Wall(650, 100, 20, 80));
   walls.push(new Wall(650, 600, 20, 80));
 
   const p1Controls = { up: "w", down: "s", left: "a", right: "d", shoot: "f" };
@@ -248,14 +326,14 @@ const player2Name = player2.username;
   const p2 = new Tank(1000, 500, tankImgRed, p2Controls, p2Counter, p2Hearts);
 
   function ensureValidSpawn(tank) {
-    if (!tank.collidesAny()) return;
+    if (!tank.collidesAnyAt(tank.x, tank.y)) return;
     const step = 10;
     let attempts = 0;
-    while (tank.collidesAny() && attempts < 50) { tank.y -= step; attempts++; }
+    while (tank.collidesAnyAt(tank.x, tank.y) && attempts < 50) { tank.y -= step; attempts++; }
     attempts = 0;
-    while (tank.collidesAny() && attempts < 50) { tank.x -= step; attempts++; }
+    while (tank.collidesAnyAt(tank.x, tank.y) && attempts < 50) { tank.x -= step; attempts++; }
     attempts = 0;
-    while (tank.collidesAny() && attempts < 50) { tank.x += step; attempts++; }
+    while (tank.collidesAnyAt(tank.x, tank.y) && attempts < 50) { tank.x += step; attempts++; }
   }
 
   ensureValidSpawn(p1);
@@ -271,10 +349,14 @@ const player2Name = player2.username;
       if (now - bullet.createdAt < bullet.canHitAfter) continue;
       for (let tank of [p1, p2]) {
         const verts = tank.getCollisionRectVertices();
-        const minX = Math.min(...verts.map(v => v.x)); const maxX = Math.max(...verts.map(v => v.x));
-        const minY = Math.min(...verts.map(v => v.y)); const maxY = Math.max(...verts.map(v => v.y));
+        const minX = Math.min(...verts.map(v => v.x));
+        const maxX = Math.max(...verts.map(v => v.x));
+        const minY = Math.min(...verts.map(v => v.y));
+        const maxY = Math.max(...verts.map(v => v.y));
         if (bullet.x > minX && bullet.x < maxX && bullet.y > minY && bullet.y < maxY) {
-          tank.takeHit(); bullet.destroyed = true; break;
+          tank.takeHit();
+          bullet.destroyed = true;
+          break;
         }
       }
     }
@@ -285,53 +367,54 @@ const player2Name = player2.username;
   let winnerText = "";
 
   async function gameOver(winner) {
-  if (gameEnded) return;
-  gameEnded = true;
-  winnerText = `${winner} WINS!`;
+    if (gameEnded) return;
+    gameEnded = true;
+    winnerText = `${winner} WINS!`;
 
-  // --- Obtener nombres ---
-  const player1 = JSON.parse(localStorage.getItem("player1"));
-  const player2 = JSON.parse(localStorage.getItem("player2"));
+    // --- Obtener nombres ---
+    const player1 = JSON.parse(localStorage.getItem("player1"));
+    const player2 = JSON.parse(localStorage.getItem("player2"));
 
-  try {
-    const res = await fetch("/update-elo", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        player1: player1.username,
-        player2: player2.username,
-        winner
-      })
-    });
+    try {
+      const res = await fetch("/update-elo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          player1: player1.username,
+          player2: player2.username,
+          winner
+        })
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (data.success) {
-      // Guardar ELOs actualizados en localStorage
-      localStorage.setItem("player1", JSON.stringify(data.updated.player1));
-      localStorage.setItem("player2", JSON.stringify(data.updated.player2));
-      console.log("ELO actualizado desde servidor:", data.updated);
-    } else {
-      console.error("Error al actualizar ELO:", data.error);
+      if (data.success) {
+        // Guardar ELOs actualizados en localStorage
+        localStorage.setItem("player1", JSON.stringify(data.updated.player1));
+        localStorage.setItem("player2", JSON.stringify(data.updated.player2));
+        console.log("ELO actualizado desde servidor:", data.updated);
+      } else {
+        console.error("Error al actualizar ELO:", data.error);
+      }
+    } catch (err) {
+      console.error("Error de red al actualizar ELO:", err);
     }
-  } catch (err) {
-    console.error("Error de red al actualizar ELO:", err);
+
+    setTimeout(() => {
+      localStorage.removeItem("player1");
+      localStorage.removeItem("player2");
+      window.location.href = "login.html";
+    }, 3000);
   }
-
-  setTimeout(() => {
-    localStorage.removeItem("player1");
-    localStorage.removeItem("player2");
-    window.location.href = "login.html";
-  }, 3000);
-}
-
 
   function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     walls.forEach(w => w.draw());
-    p1.update(); p2.update();
+    p1.update();
+    p2.update();
     checkBulletHits();
-    p1.draw(); p2.draw();
+    p1.draw();
+    p2.draw();
 
     if (gameEnded) {
       ctx.fillStyle = "rgba(0,0,0,0.7)";

@@ -1,6 +1,5 @@
 // Funciones de registro/login
 
-
 // --- Función para cargar ranking ---
 async function loadRanking() {
   try {
@@ -24,13 +23,14 @@ async function loadRanking() {
   }
 }
 
+// Limpiar localStorage de jugadores al cargar la página de login
+localStorage.removeItem("player1");
+localStorage.removeItem("player2");
+localStorage.removeItem("player1Elo");
+localStorage.removeItem("player2Elo");
+
 // Cargar ranking al abrir la página
 loadRanking();
-
-
-
-
-
 
 async function registerUser(username, password) {
   const res = await fetch("/register", {
@@ -80,6 +80,13 @@ document.getElementById("btnRegister1").addEventListener("click", async () => {
 document.getElementById("btnLogin1").addEventListener("click", async () => {
   const username = document.getElementById("username1").value.trim();
   const password = document.getElementById("password1").value.trim();
+  
+  // Verificar si Player 2 ya está usando este usuario
+  const player2 = JSON.parse(localStorage.getItem("player2"));
+  if (player2 && player2.username === username) {
+    return showMessage(p1Container, "This user is already logged in as Player 2!", "red");
+  }
+  
   const result = await loginUser(username, password);
   if (result.error) return showMessage(p1Container, result.error, "red");
 
@@ -100,6 +107,13 @@ document.getElementById("btnRegister2").addEventListener("click", async () => {
 document.getElementById("btnLogin2").addEventListener("click", async () => {
   const username = document.getElementById("username2").value.trim();
   const password = document.getElementById("password2").value.trim();
+  
+  // Verificar si Player 1 ya está usando este usuario
+  const player1 = JSON.parse(localStorage.getItem("player1"));
+  if (player1 && player1.username === username) {
+    return showMessage(p2Container, "This user is already logged in as Player 1!", "red");
+  }
+  
   const result = await loginUser(username, password);
   if (result.error) return showMessage(p2Container, result.error, "red");
 
@@ -112,12 +126,17 @@ const playContainer = document.getElementById("playContainer");
 document.getElementById("btnPlay").addEventListener("click", () => {
   const p1 = JSON.parse(localStorage.getItem("player1"));
   const p2 = JSON.parse(localStorage.getItem("player2"));
-  if (!p1 || !p2) return showMessage(playContainer, "Both players have lo Login", "red");
+  if (!p1 || !p2) return showMessage(playContainer, "Both players have to Login", "red");
+
+  // Doble verificación antes de iniciar el juego
+  if (p1.username === p2.username) {
+    return showMessage(playContainer, "Players must be different!", "red");
+  }
 
   localStorage.setItem("player1Elo", p1.elo);
   localStorage.setItem("player2Elo", p2.elo);
-  
 
   window.location.href = "game.html";
 });
+
 loadRanking();
