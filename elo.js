@@ -21,7 +21,7 @@ export function updateElo(player1, player2, winner) {
 
   if (!users[player1] || !users[player2]) throw new Error("Jugador no encontrado");
 
-  const K = 30;
+  const K = 75;
 
   const R1 = Math.pow(10, users[player1].elo / 400);
   const R2 = Math.pow(10, users[player2].elo / 400);
