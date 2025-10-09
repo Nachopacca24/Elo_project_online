@@ -69,16 +69,33 @@ header p {
 }
 
 /* ===== Inputs ===== */
+/* ===== Inputs (corregido) ===== */
 .container input {
   display: block;
   width: 90%;
   margin: 10px auto;
   padding: 10px;
-  border: none;
+  border: 1px solid #00ff66;
   border-radius: 8px;
-  background: #262626;
-  color: #00ff66;
+  background: #111;          /* Fondo oscuro constante */
+  color: #00ff66;            /* Texto verde */
   font-size: 1em;
+  outline: none;             /* Quita el borde azul de enfoque */
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Cuando el usuario hace clic o escribe */
+.container input:focus {
+  background: #1a1a1a;       /* Fondo más claro pero sigue oscuro */
+  box-shadow: 0 0 10px #00ff66;
+}
+
+/* Cuando el navegador autocompleta (corrige fondo blanco de Chrome) */
+input:-webkit-autofill {
+  background-color: #111 !important;
+  -webkit-box-shadow: 0 0 0px 1000px #111 inset !important;
+  -webkit-text-fill-color: #00ff66 !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 /* ===== Botones ===== */
@@ -143,7 +160,7 @@ button:hover {
 
 /* ===== Canvas del juego ===== */
 canvas {
-  background-color: #007a00;
+  background-color: #1a1a1a;
   border: 2px solid #00ff66;
   display: block;
   border-radius: 10px;
@@ -207,3 +224,4 @@ canvas {
   text-shadow: 0 0 15px #00ff66, 0 0 30px #00cc55;
   display: inline-block;
 }
+

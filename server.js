@@ -17,7 +17,7 @@ app.post("/register", (req, res) => {
   const { username, password } = req.body;
   const users = readUsers();
 
-  if (users[username]) return res.json({ error: "Usuario ya existe" });
+  if (users[username]) return res.json({ error: "User already exists" });
 
   users[username] = { password, elo: 1000 };
   saveUsers(users);
@@ -30,8 +30,8 @@ app.post("/login", (req, res) => {
   const users = readUsers();
 
   const user = users[username];
-  if (!user) return res.json({ error: "Usuario no encontrado" });
-  if (user.password !== password) return res.json({ error: "Contraseña incorrecta" });
+  if (!user) return res.json({ error: "User not found" });
+  if (user.password !== password) return res.json({ error: "Wrong password" });
 
   res.json({ username, elo: user.elo });
 });
@@ -57,4 +57,4 @@ app.post("/update-elo", (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log("Servidor corriendo en http://localhost:3000"));
+app.listen(3000, () => console.log("Servidor corriendo en http://localhost:3000/login.html"));

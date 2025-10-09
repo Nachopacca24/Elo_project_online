@@ -15,12 +15,12 @@ async function loadRanking() {
 
     users.forEach((user, index) => {
       const li = document.createElement("li");
-      li.textContent = `${index + 1}. ${user.username} - ELO: ${user.elo}`;
+      li.textContent = `${index + 1}. ${user.username} - 🏅: ${user.elo}`;
       rankingList.appendChild(li);
     });
 
   } catch (err) {
-    console.error("Error cargando ranking:", err);
+    console.error("Error loading Ranking:", err);
   }
 }
 
@@ -85,7 +85,7 @@ document.getElementById("btnLogin1").addEventListener("click", async () => {
 
   // Guardar el username del input y el elo del resultado
   localStorage.setItem("player1", JSON.stringify({ username: username, elo: result.elo }));
-  showMessage(p1Container, `P1 ${username} listo!`, "green");
+  showMessage(p1Container, `P1 ${username} Ready!`, "green");
 });
 
 // Player 2
@@ -94,7 +94,7 @@ document.getElementById("btnRegister2").addEventListener("click", async () => {
   const username = document.getElementById("username2").value.trim();
   const password = document.getElementById("password2").value.trim();
   const result = await registerUser(username, password);
-  showMessage(p2Container, result.error || `P2 ${username} registrado!`, result.error ? "red" : "green");
+  showMessage(p2Container, result.error || `P2 ${username} Registred!`, result.error ? "red" : "green");
 });
 
 document.getElementById("btnLogin2").addEventListener("click", async () => {
@@ -104,7 +104,7 @@ document.getElementById("btnLogin2").addEventListener("click", async () => {
   if (result.error) return showMessage(p2Container, result.error, "red");
 
   localStorage.setItem("player2", JSON.stringify({ username: username, elo: result.elo }));
-  showMessage(p2Container, `P2 ${username} listo!`, "green");
+  showMessage(p2Container, `P2 ${username} Ready!`, "green");
 });
 
 // Botón jugar
@@ -112,7 +112,7 @@ const playContainer = document.getElementById("playContainer");
 document.getElementById("btnPlay").addEventListener("click", () => {
   const p1 = JSON.parse(localStorage.getItem("player1"));
   const p2 = JSON.parse(localStorage.getItem("player2"));
-  if (!p1 || !p2) return showMessage(playContainer, "Ambos jugadores deben iniciar sesión", "red");
+  if (!p1 || !p2) return showMessage(playContainer, "Both players have lo Login", "red");
 
   localStorage.setItem("player1Elo", p1.elo);
   localStorage.setItem("player2Elo", p2.elo);

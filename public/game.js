@@ -61,56 +61,104 @@ const player2Name = player2.username;
 
   // --- Clases ---
   class Wall {
-    constructor(x, y, w, h) { this.x = x; this.y = y; this.width = w; this.height = h; }
-    draw() {
-      ctx.fillStyle = "#cccccc";
-      ctx.fillRect(this.x, this.y, this.width, this.height);
-      ctx.strokeStyle = "black";
-      ctx.strokeRect(this.x, this.y, this.width, this.height);
-    }
+  constructor(x, y, w, h) {
+    this.x = x;
+    this.y = y;
+    this.width = w;
+    this.height = h;
   }
 
+  draw() {
+    // 🎨 Degradado metálico
+    const gradient = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y + this.height);
+    gradient.addColorStop(0, "#4a4a4a");  // gris oscuro
+    gradient.addColorStop(0.5, "#9e9e9e"); // brillo metálico medio
+    gradient.addColorStop(1, "#3d3d3d");  // gris oscuro
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+
+    // 💡 Borde verde suave
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#00ff6699";  // verde con transparencia (más suave)
+    ctx.shadowBlur = 4;             // brillo más tenue
+    ctx.shadowColor = "#00ff6699";  // sombra verde débil
+    ctx.strokeRect(this.x, this.y, this.width, this.height);
+
+    // 🔧 Desactivar sombra para no afectar otros elementos
+    ctx.shadowBlur = 0;
+  }
+}
+
+
   class Bullet {
-    constructor(x, y, angle) {
-      this.x = x;
-      this.y = y;
-      this.speed = 7;
-      this.radius = 5;
-      this.destroyed = false;
-      this.createdAt = Date.now();
-      this.canHitAfter = 100;
-      const rad = (angle - 90) * Math.PI / 180;
-      this.vx = this.speed * Math.cos(rad);
-      this.vy = this.speed * Math.sin(rad);
+  constructor(x, y, angle) {
+    this.x = x;
+    this.y = y;
+    this.speed = 7;
+    this.radius = 5;
+    this.destroyed = false;
+    this.createdAt = Date.now();
+    this.canHitAfter = 100;
+
+    const rad = (angle - 90) * Math.PI / 180;
+    this.vx = this.speed * Math.cos(rad);
+    this.vy = this.speed * Math.sin(rad);
+  }
+
+  update() {
+    if (Date.now() - this.createdAt > 2500) { 
+      this.destroyed = true; 
+      return; 
     }
-    update() {
-      if (Date.now() - this.createdAt > 2500) { this.destroyed = true; return; }
-      this.x += this.vx; this.y += this.vy;
 
-      // Rebote bordes
-      if (this.x - this.radius <= 0) { this.x = this.radius; this.vx = -this.vx; }
-      if (this.x + this.radius >= canvas.width) { this.x = canvas.width - this.radius; this.vx = -this.vx; }
-      if (this.y - this.radius <= 0) { this.y = this.radius; this.vy = -this.vy; }
-      if (this.y + this.radius >= canvas.height) { this.y = canvas.height - this.radius; this.vy = -this.vy; }
+    this.x += this.vx; 
+    this.y += this.vy;
 
-      // Rebote muros
-      for (let wall of walls) {
-        if (this.x + this.radius > wall.x && this.x - this.radius < wall.x + wall.width &&
-            this.y + this.radius > wall.y && this.y - this.radius < wall.y + wall.height) {
-          const prevX = this.x - this.vx;
-          const prevY = this.y - this.vy;
-          if (prevX + this.radius <= wall.x || prevX - this.radius >= wall.x + wall.width) {
-            this.vx = -this.vx;
-            this.x = prevX + (prevX + this.radius <= wall.x ? -this.radius : this.radius);
-          } else if (prevY + this.radius <= wall.y || prevY - this.radius >= wall.y + wall.height) {
-            this.vy = -this.vy;
-            this.y = prevY + (prevY + this.radius <= wall.y ? -this.radius : this.radius);
-          } else { this.vx = -this.vx; this.vy = -this.vy; }
+    // Rebote bordes
+    if (this.x - this.radius <= 0) { this.x = this.radius; this.vx = -this.vx; }
+    if (this.x + this.radius >= canvas.width) { this.x = canvas.width - this.radius; this.vx = -this.vx; }
+    if (this.y - this.radius <= 0) { this.y = this.radius; this.vy = -this.vy; }
+    if (this.y + this.radius >= canvas.height) { this.y = canvas.height - this.radius; this.vy = -this.vy; }
+
+    // Rebote muros
+    for (let wall of walls) {
+      if (this.x + this.radius > wall.x && this.x - this.radius < wall.x + wall.width &&
+          this.y + this.radius > wall.y && this.y - this.radius < wall.y + wall.height) {
+        const prevX = this.x - this.vx;
+        const prevY = this.y - this.vy;
+        if (prevX + this.radius <= wall.x || prevX - this.radius >= wall.x + wall.width) {
+          this.vx = -this.vx;
+          this.x = prevX;
+        } else if (prevY + this.radius <= wall.y || prevY - this.radius >= wall.y + wall.height) {
+          this.vy = -this.vy;
+          this.y = prevY;
+        } else { 
+          this.vx = -this.vx; 
+          this.vy = -this.vy; 
         }
       }
     }
-    draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2); ctx.fillStyle = "black"; ctx.fill(); ctx.closePath(); }
   }
+
+  draw() {
+    ctx.beginPath();
+    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 2);
+    gradient.addColorStop(0, "#ff8800");   // centro naranja brillante
+    gradient.addColorStop(0.6, "#ff3300"); // rojo encendido
+    gradient.addColorStop(1, "#660000");   // borde oscuro
+
+    ctx.fillStyle = gradient;
+    ctx.shadowBlur = 10;           // brillo leve
+    ctx.shadowColor = "#ff3300";   // tono neón rojo–naranja
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.shadowBlur = 0;            // limpiar sombra para no afectar otros objetos
+  }
+}
+
 
   class Tank {
     constructor(x, y, sprite, controls, counterElement, heartsElement) {
@@ -193,8 +241,8 @@ const player2Name = player2.username;
   walls.push(new Wall(1050, 200, 80, 20)); walls.push(new Wall(650, 100, 20, 80));
   walls.push(new Wall(650, 600, 20, 80));
 
-  const p1Controls = { up: "arrowup", down: "arrowdown", left: "arrowleft", right: "arrowright", shoot: " " };
-  const p2Controls = { up: "w", down: "s", left: "a", right: "d", shoot: "f" };
+  const p1Controls = { up: "w", down: "s", left: "a", right: "d", shoot: "f" };
+  const p2Controls = { up: "arrowup", down: "arrowdown", left: "arrowleft", right: "arrowright", shoot: " " };
 
   const p1 = new Tank(300, 300, tankImgBlue, p1Controls, p1Counter, p1Hearts);
   const p2 = new Tank(1000, 500, tankImgRed, p2Controls, p2Counter, p2Hearts);

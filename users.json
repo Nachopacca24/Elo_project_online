@@ -1,18 +1,22 @@
 {
   "Nachopacca": {
     "password": "123",
-    "elo": 1010
+    "elo": 1079
   },
   "lol": {
     "password": "123",
-    "elo": 1005
+    "elo": 954
   },
   "pop": {
     "password": "1",
-    "elo": 1000
+    "elo": 968
   },
   "yep": {
     "password": "2",
     "elo": 985
+  },
+  "Fabi": {
+    "password": "123",
+    "elo": 1014
   }
 }

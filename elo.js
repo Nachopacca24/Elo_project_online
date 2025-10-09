@@ -19,7 +19,7 @@ export function saveUsers(users) {
 export function updateElo(player1, player2, winner) {
   const users = readUsers();
 
-  if (!users[player1] || !users[player2]) throw new Error("Jugador no encontrado");
+  if (!users[player1] || !users[player2]) throw new Error("User not found");
 
   const K = 75;
 
