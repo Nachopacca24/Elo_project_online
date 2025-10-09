@@ -1,69 +1,50 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Tank Battle - Login</title>
-  <style>
-    body {
-      background-color: #111;
-      color: white;
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-    .login-box {
-      background: #222;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      width: 300px;
-      margin: 10px;
-    }
-    input {
-      margin: 5px;
-      padding: 5px;
-      width: 90%;
-      border: none;
-      border-radius: 5px;
-    }
-    button {
-      margin-top: 10px;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 5px;
-      background-color: #0f8;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover {
-      background-color: #0c6;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Tanques Online - Login</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Tank Battle 🔥</h1>
 
-  <div class="login-box" id="player1Box">
-    <h2>Jugador 1</h2>
-    <input id="p1User" placeholder="Usuario"><br>
-    <input id="p1Pass" type="password" placeholder="Contraseña"><br>
-    <button onclick="login(1)">Iniciar sesión</button>
-    <button onclick="registerUser(1)">Crear usuario</button>
+<div class="login-wrapper">
+
+  <header>
+    <h1>🎮 Shoot to kill </h1>
+    <p>Register or login to play!</p>
+  </header>
+
+  <div class="players-container">
+
+    <div class="container" id="player1Container">
+      <h2>Player 1</h2>
+      <input type="text" id="username1" placeholder="User">
+      <input type="password" id="password1" placeholder="Password">
+      <button id="btnRegister1">Register</button>
+      <button id="btnLogin1">Login</button>
+    </div>
+
+    <div class="container" id="player2Container">
+      <h2>Player 2</h2>
+      <input type="text" id="username2" placeholder="User">
+      <input type="password" id="password2" placeholder="Password">
+      <button id="btnRegister2">Register</button>
+      <button id="btnLogin2">Login</button>
+    </div>
+
   </div>
 
-  <div class="login-box" id="player2Box">
-    <h2>Jugador 2</h2>
-    <input id="p2User" placeholder="Usuario"><br>
-    <input id="p2Pass" type="password" placeholder="Contraseña"><br>
-    <button onclick="login(2)">Iniciar sesión</button>
-    <button onclick="registerUser(2)">Crear usuario</button>
+  <div class="play-container" id="playContainer">
+    <button id="btnPlay">🏁 Play</button>
   </div>
 
-  <button id="startBtn" style="display:none;" onclick="startGame()">🎮 Empezar juego</button>
+  <div class="container ranking-container" id="rankingContainer">
+    <h2>Global Ranking</h2>
+    <ul id="rankingList"></ul>
+  </div>
 
-  <script src="login.js"></script>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>

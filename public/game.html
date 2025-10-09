@@ -1,19 +1,74 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Tanques Online</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tanques - Juego</title>
+  <link rel="stylesheet" href="style.css">
+  
+
 </head>
 <body>
 
-<canvas id="gameCanvas" width="1280" height="720"></canvas>
+  <h2 id="welcome"></h2>
 
-<div id="ui">
-  <div id="player1Counter" class="player-counter blue">Player 1: Ready</div>
-  <div id="player2Counter" class="player-counter red">Player 2: Ready</div>
-</div>
+  <canvas id="gameCanvas" width="1280" height="720"></canvas>
 
-<script src="game.js"></script>
+  <div class="btn-container">
+    <button onclick="finishGame('player1')">Player 1 Gana</button>
+    <button onclick="finishGame('player2')">Player 2 Gana</button>
+  </div>
+
+  <script>
+    function renderWelcome() {
+      const player1 = JSON.parse(localStorage.getItem("player1"));
+      const player2 = JSON.parse(localStorage.getItem("player2"));
+
+      if (!player1 || !player2) {
+        alert("Debes iniciar sesión con ambos jugadores.");
+        window.location.href = "login.html";
+      } else {
+        document.getElementById("welcome").innerHTML =
+          `<span class="player1">${player1.username} 🏅${player1.elo}</span>
+           <span class="vs-text">VS</span>
+           <span class="player2">${player2.username} 🏅${player2.elo}</span>`;
+      }
+    }
+
+    renderWelcome();
+
+    async function finishGame(winner) {
+      // Siempre obtener los valores actualizados
+      const player1 = JSON.parse(localStorage.getItem("player1"));
+      const player2 = JSON.parse(localStorage.getItem("player2"));
+
+      const res = await fetch("/update-elo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          player1: player1.username,
+          player2: player2.username,
+          winner
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        // Guardar los nuevos ELOs
+        localStorage.setItem("player1", JSON.stringify(data.updated.player1));
+        localStorage.setItem("player2", JSON.stringify(data.updated.player2));
+
+        alert(`Nuevo ELO:\n${data.updated.player1.username}: ${data.updated.player1.elo}\n${data.updated.player2.username}: ${data.updated.player2.elo}`);
+
+        // Recargar para reflejar cambios
+        renderWelcome();
+      } else {
+        alert("Error actualizando ELO: " + data.error);
+      }
+    }
+  </script>
+
+  <script src="game.js"></script>
 </body>
 </html>
