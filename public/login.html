@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Tanques Online - Login</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="login-wrapper">
+
+  <header>
+    <h1>🎮 Shoot to kill </h1>
+    <p>Register or login to play!</p>
+  </header>
+
+  <div class="players-container">
+
+    <div class="container" id="player1Container">
+      <h2>Player 1</h2>
+      <input type="text" id="username1" placeholder="User">
+      <input type="password" id="password1" placeholder="Password">
+      <button id="btnRegister1">Register</button>
+      <button id="btnLogin1">Login</button>
+    </div>
+
+    <div class="container" id="player2Container">
+      <h2>Player 2</h2>
+      <input type="text" id="username2" placeholder="User">
+      <input type="password" id="password2" placeholder="Password">
+      <button id="btnRegister2">Register</button>
+      <button id="btnLogin2">Login</button>
+    </div>
+
+  </div>
+
+  <div class="play-container" id="playContainer">
+    <button id="btnPlay">🏁 Play</button>
+  </div>
+
+  <div class="container ranking-container" id="rankingContainer">
+    <h2>Global Ranking</h2>
+    <ul id="rankingList"></ul>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
