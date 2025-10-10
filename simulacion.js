@@ -3,7 +3,10 @@ import path from "path";
 
 const filePath = path.resolve("./usuarios_simulacion.json");
 
-// Leer usuarios desde usuarios_simulacion.json (formato objeto)
+/* =====================================================
+   📌 1️⃣ Leer usuarios desde usuarios_simulacion.json
+   Retorna un objeto con los usuarios y sus datos
+===================================================== */
 function readUsers() {
   if (!fs.existsSync(filePath)) {
     console.log("❌ No se encontró usuarios_simulacion.json");
@@ -19,12 +22,16 @@ function readUsers() {
   }
 }
 
-// Guardar usuarios en usuarios_simulacion.json
+/* =====================================================
+   📌 2️⃣ Guardar usuarios en usuarios_simulacion.json
+===================================================== */
 function saveUsers(users) {
   fs.writeFileSync(filePath, JSON.stringify(users, null, 2));
 }
 
-// Actualizar ELO
+/* =====================================================
+   📌 3️⃣ Actualizar ELO de los jugadores después de una partida
+===================================================== */
 function updateElo(users, player1Username, player2Username, winner) {
   const player1 = users[player1Username];
   const player2 = users[player2Username];
@@ -55,7 +62,9 @@ function updateElo(users, player1Username, player2Username, winner) {
   };
 }
 
-// Pesos de habilidad
+/* =====================================================
+   📌 4️⃣ Pesos de habilidad de cada jugador
+===================================================== */
 const skillWeights = {
   "TankMaster": 0.85, "IronWarrior": 0.85, "BattleKing": 0.85,
   "SteelCommander": 0.80, "WarMachine": 0.80, "ThunderStrike": 0.80, "ArmorBreaker": 0.80,
@@ -69,7 +78,9 @@ const skillWeights = {
   "ZeroGravity": 0.40, "CosmicPower": 0.40, "NuclearRage": 0.40, "DigitalGhost": 0.40, "ElectricDream": 0.40
 };
 
-// Ganador según habilidad
+/* =====================================================
+   📌 5️⃣ Determinar ganador según habilidad
+===================================================== */
 function determineWinner(player1, player2) {
   const skill1 = skillWeights[player1] || 0.50;
   const skill2 = skillWeights[player2] || 0.50;
@@ -78,7 +89,9 @@ function determineWinner(player1, player2) {
   return Math.random() < prob1 ? player1 : player2;
 }
 
-// 🔥 Nuevo: Seleccionar oponente con ELO similar
+/* =====================================================
+   📌 6️⃣ Seleccionar oponente con ELO similar
+===================================================== */
 function findOpponentByElo(users, player1, initialTolerance = 100, maxTolerance = 800) {
   const elo1 = users[player1].elo;
   let tolerance = initialTolerance;
@@ -93,16 +106,17 @@ function findOpponentByElo(users, player1, initialTolerance = 100, maxTolerance 
       return candidates[Math.floor(Math.random() * candidates.length)];
     }
 
-    tolerance += 100; // aumenta el rango en 100 puntos cada intento
+    tolerance += 100;
   }
 
-  // Si no hay oponentes ni con rango máximo, elige cualquiera
+  // Si no hay oponentes dentro del rango máximo, elegir cualquiera
   const allOthers = Object.keys(users).filter(p => p !== player1);
   return allOthers[Math.floor(Math.random() * allOthers.length)];
 }
 
-
-// Simulación principal
+/* =====================================================
+   📌 7️⃣ Simulación principal
+===================================================== */
 function runSimulation(matchesPerPlayer = 100) {
   const users = readUsers();
   const usernames = Object.keys(users);
@@ -121,6 +135,7 @@ function runSimulation(matchesPerPlayer = 100) {
   console.log(`Partidas por jugador: ${matchesPerPlayer}`);
   console.log(`Total de partidas: ${totalMatches}\n`);
 
+  // Inicializar estadísticas
   const stats = {};
   usernames.forEach(username => {
     stats[username] = { 
@@ -133,46 +148,49 @@ function runSimulation(matchesPerPlayer = 100) {
 
   let matchCounter = 0;
 
-  for (let i = 0; i < usernames.length; i++) {
-    const player1 = usernames[i];
+  // 🔹 Bucle de simulación
+  for (let i = 0; i < totalMatches; i++) {
+    matchCounter++;
 
-    for (let j = 0; j < matchesPerPlayer; j++) {
-      matchCounter++;
+    // Elegir player1 aleatoriamente
+    const player1 = usernames[Math.floor(Math.random() * usernames.length)];
+    const player2 = findOpponentByElo(users, player1, 200);
 
-      const player2 = findOpponentByElo(users, player1, 200);
+    const elosBefore = {
+      [player1]: users[player1].elo,
+      [player2]: users[player2].elo
+    };
 
-      const elosBefore = {
-        [player1]: users[player1].elo,
-        [player2]: users[player2].elo
-      };
+    const winner = determineWinner(player1, player2);
+    const loser = winner === player1 ? player2 : player1;
 
-      const winner = determineWinner(player1, player2);
-      const loser = winner === player1 ? player2 : player1;
+    const result = updateElo(users, player1, player2, winner);
 
-      const result = updateElo(users, player1, player2, winner);
+    // Actualizar estadísticas
+    stats[winner].wins++;
+    stats[loser].losses++;
+    stats[player1].gamesPlayed++;
+    stats[player2].gamesPlayed++;
 
-      stats[winner].wins++;
-      stats[loser].losses++;
-      stats[player1].gamesPlayed++;
-      stats[player2].gamesPlayed++;
+    // Imprimir progreso cada 100 partidas
+    if (matchCounter % 100 === 0 || matchCounter === totalMatches) {
+      const skill1 = (skillWeights[player1] * 100).toFixed(0);
+      const skill2 = (skillWeights[player2] * 100).toFixed(0);
+      const eloChange1 = result.player1.elo - elosBefore[player1];
+      const eloChange2 = result.player2.elo - elosBefore[player2];
 
-      if (matchCounter % 100 === 0 || matchCounter === totalMatches) {
-        const skill1 = (skillWeights[player1] * 100).toFixed(0);
-        const skill2 = (skillWeights[player2] * 100).toFixed(0);
-        const eloChange1 = result.player1.elo - elosBefore[player1];
-        const eloChange2 = result.player2.elo - elosBefore[player2];
-
-        console.log(`Partida ${matchCounter}/${totalMatches}:`);
-        console.log(`  ${player1} (${skill1}% skill, ELO: ${elosBefore[player1]}) ${eloChange1 > 0 ? '+' : ''}${eloChange1}`);
-        console.log(`  vs`);
-        console.log(`  ${player2} (${skill2}% skill, ELO: ${elosBefore[player2]}) ${eloChange2 > 0 ? '+' : ''}${eloChange2}`);
-        console.log(`  🏆 Ganador: ${winner}`);
-        console.log(`  📊 Progreso: ${((matchCounter / totalMatches) * 100).toFixed(1)}%\n`);
-      }
+      console.log(`Partida ${matchCounter}/${totalMatches}:`);
+      console.log(`  ${player1} (${skill1}% skill, ELO: ${elosBefore[player1]}) ${eloChange1 > 0 ? '+' : ''}${eloChange1}`);
+      console.log(`  vs`);
+      console.log(`  ${player2} (${skill2}% skill, ELO: ${elosBefore[player2]}) ${eloChange2 > 0 ? '+' : ''}${eloChange2}`);
+      console.log(`  🏆 Ganador: ${winner}`);
+      console.log(`  📊 Progreso: ${((matchCounter / totalMatches) * 100).toFixed(1)}%\n`);
     }
   }
 
-  // Resultados finales
+  /* =====================================================
+     📌 8️⃣ Resultados finales y ranking
+  ====================================================== */
   console.log("\n" + "=".repeat(60));
   console.log("📊 RESULTADOS FINALES");
   console.log("=".repeat(60));
@@ -211,7 +229,9 @@ function runSimulation(matchesPerPlayer = 100) {
     console.log(`${pos}  | ${name} | ${skill}%  | ${games} | ${record} | ${wr}% | ${initialElo} | ${finalElo} | ${changeColored}`);
   });
 
-  // Estadísticas generales
+  /* =====================================================
+     📌 9️⃣ Estadísticas generales
+  ====================================================== */
   console.log("\n" + "=".repeat(60));
   console.log("📈 ESTADÍSTICAS GENERALES");
   console.log("=".repeat(60));
@@ -234,7 +254,9 @@ function runSimulation(matchesPerPlayer = 100) {
   console.log("\n✅ Simulación completada!");
   console.log(`📁 Resultados guardados en: usuarios_simulacion.json`);
 
-  // Validación del sistema
+  /* =====================================================
+     📌  🔟 Validación del sistema
+  ====================================================== */
   console.log("\n" + "=".repeat(60));
   console.log("🎯 VALIDACIÓN DEL SISTEMA");
   console.log("=".repeat(60));
@@ -247,5 +269,7 @@ function runSimulation(matchesPerPlayer = 100) {
   console.log(`\n✅ El sistema ELO refleja correctamente la habilidad de los jugadores!`);
 }
 
-// Ejecutar simulación
+/* =====================================================
+   📌 1️⃣1️⃣ Ejecutar simulación
+===================================================== */
 runSimulation(100);
