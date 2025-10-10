@@ -1,202 +1,162 @@
-[
-  {
-    "username": "TankMaster",
+{
+  "TankMaster": {
     "password": "pass123",
-    "elo": 1083
+    "elo": 1558
   },
-  {
-    "username": "IronWarrior",
+  "IronWarrior": {
     "password": "pass123",
-    "elo": 979
+    "elo": 1591
   },
-  {
-    "username": "BattleKing",
+  "BattleKing": {
     "password": "pass123",
-    "elo": 1065
+    "elo": 1529
   },
-  {
-    "username": "SteelCommander",
+  "SteelCommander": {
     "password": "pass123",
-    "elo": 1184
+    "elo": 1613
   },
-  {
-    "username": "WarMachine",
+  "WarMachine": {
     "password": "pass123",
-    "elo": 1113
+    "elo": 1273
   },
-  {
-    "username": "ThunderStrike",
+  "ThunderStrike": {
     "password": "pass123",
-    "elo": 1220
+    "elo": 1966
   },
-  {
-    "username": "ArmorBreaker",
+  "ArmorBreaker": {
     "password": "pass123",
-    "elo": 1074
+    "elo": 1893
   },
-  {
-    "username": "BlazeGeneral",
+  "BlazeGeneral": {
     "password": "pass123",
-    "elo": 966
+    "elo": 1152
   },
-  {
-    "username": "ShadowTank",
+  "ShadowTank": {
     "password": "pass123",
-    "elo": 893
+    "elo": 1251
   },
-  {
-    "username": "FireStorm",
+  "FireStorm": {
+    "password": "pass123",
+    "elo": 2090
+  },
+  "IceCannon": {
+    "password": "pass123",
+    "elo": 1744
+  },
+  "VortexRider": {
+    "password": "pass123",
+    "elo": 1131
+  },
+  "NightHunter": {
+    "password": "pass123",
+    "elo": 1371
+  },
+  "TitanSlayer": {
+    "password": "pass123",
+    "elo": 1282
+  },
+  "PhoenixWing": {
+    "password": "pass123",
+    "elo": 1321
+  },
+  "CrimsonFury": {
+    "password": "pass123",
+    "elo": 1086
+  },
+  "StormBringer": {
+    "password": "pass123",
+    "elo": 1204
+  },
+  "DarkViper": {
+    "password": "pass123",
+    "elo": 1295
+  },
+  "GoldenEagle": {
+    "password": "pass123",
+    "elo": 1305
+  },
+  "SilverBullet": {
+    "password": "pass123",
+    "elo": 859
+  },
+  "BlitzKrieg": {
+    "password": "pass123",
+    "elo": 1047
+  },
+  "RapidFire": {
+    "password": "pass123",
+    "elo": 795
+  },
+  "HeavyArtillery": {
+    "password": "pass123",
+    "elo": 1436
+  },
+  "GhostRecon": {
+    "password": "pass123",
+    "elo": 869
+  },
+  "ApexPredator": {
+    "password": "pass123",
+    "elo": 573
+  },
+  "VenomStrike": {
+    "password": "pass123",
+    "elo": 743
+  },
+  "LaserFocus": {
+    "password": "pass123",
+    "elo": 1058
+  },
+  "TurboCharger": {
+    "password": "pass123",
+    "elo": 286
+  },
+  "MegaBlast": {
+    "password": "pass123",
+    "elo": 564
+  },
+  "UltraShield": {
+    "password": "pass123",
+    "elo": 1271
+  },
+  "NeonRacer": {
+    "password": "pass123",
+    "elo": 456
+  },
+  "QuantumLeap": {
+    "password": "pass123",
+    "elo": 520
+  },
+  "CyberNinja": {
+    "password": "pass123",
+    "elo": 501
+  },
+  "AlphaWolf": {
+    "password": "pass123",
+    "elo": -234
+  },
+  "OmegaForce": {
+    "password": "pass123",
+    "elo": 161
+  },
+  "ZeroGravity": {
+    "password": "pass123",
+    "elo": 395
+  },
+  "CosmicPower": {
     "password": "pass123",
     "elo": 982
   },
-  {
-    "username": "IceCannon",
+  "NuclearRage": {
     "password": "pass123",
-    "elo": 1026
+    "elo": -45
   },
-  {
-    "username": "VortexRider",
+  "DigitalGhost": {
     "password": "pass123",
-    "elo": 1031
+    "elo": 406
   },
-  {
-    "username": "NightHunter",
+  "ElectricDream": {
     "password": "pass123",
-    "elo": 1160
-  },
-  {
-    "username": "TitanSlayer",
-    "password": "pass123",
-    "elo": 941
-  },
-  {
-    "username": "PhoenixWing",
-    "password": "pass123",
-    "elo": 1080
-  },
-  {
-    "username": "CrimsonFury",
-    "password": "pass123",
-    "elo": 1067
-  },
-  {
-    "username": "StormBringer",
-    "password": "pass123",
-    "elo": 948
-  },
-  {
-    "username": "DarkViper",
-    "password": "pass123",
-    "elo": 975
-  },
-  {
-    "username": "GoldenEagle",
-    "password": "pass123",
-    "elo": 1082
-  },
-  {
-    "username": "SilverBullet",
-    "password": "pass123",
-    "elo": 1048
-  },
-  {
-    "username": "BlitzKrieg",
-    "password": "pass123",
-    "elo": 870
-  },
-  {
-    "username": "RapidFire",
-    "password": "pass123",
-    "elo": 872
-  },
-  {
-    "username": "HeavyArtillery",
-    "password": "pass123",
-    "elo": 995
-  },
-  {
-    "username": "GhostRecon",
-    "password": "pass123",
-    "elo": 1238
-  },
-  {
-    "username": "ApexPredator",
-    "password": "pass123",
-    "elo": 1089
-  },
-  {
-    "username": "VenomStrike",
-    "password": "pass123",
-    "elo": 1083
-  },
-  {
-    "username": "LaserFocus",
-    "password": "pass123",
-    "elo": 1056
-  },
-  {
-    "username": "TurboCharger",
-    "password": "pass123",
-    "elo": 927
-  },
-  {
-    "username": "MegaBlast",
-    "password": "pass123",
-    "elo": 935
-  },
-  {
-    "username": "UltraShield",
-    "password": "pass123",
-    "elo": 885
-  },
-  {
-    "username": "NeonRacer",
-    "password": "pass123",
-    "elo": 1034
-  },
-  {
-    "username": "QuantumLeap",
-    "password": "pass123",
-    "elo": 967
-  },
-  {
-    "username": "CyberNinja",
-    "password": "pass123",
-    "elo": 820
-  },
-  {
-    "username": "AlphaWolf",
-    "password": "pass123",
-    "elo": 956
-  },
-  {
-    "username": "OmegaForce",
-    "password": "pass123",
-    "elo": 1079
-  },
-  {
-    "username": "ZeroGravity",
-    "password": "pass123",
-    "elo": 877
-  },
-  {
-    "username": "CosmicPower",
-    "password": "pass123",
-    "elo": 897
-  },
-  {
-    "username": "NuclearRage",
-    "password": "pass123",
-    "elo": 749
-  },
-  {
-    "username": "DigitalGhost",
-    "password": "pass123",
-    "elo": 925
-  },
-  {
-    "username": "ElectricDream",
-    "password": "pass123",
-    "elo": 855
+    "elo": -204
   }
-]
+}
